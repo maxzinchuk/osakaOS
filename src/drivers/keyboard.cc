@@ -27,6 +27,55 @@ void KeyboardEventHandler::modeSet(uint8_t) {
 }
 
 
+LainKeyboardDriver::LainKeyboardDriver(InterruptManager* manager, KeyboardEventHandler *handler)
+: InterruptHandler(0x21, manager),
+dataport(0x60),
+commandport(0x64) {
+
+	this->handler = handler;
+}
+
+LainKeyboardDriver::~LainKeyboardDriver(){
+
+}
+
+void LainKeyboardDriver::Activate() {
+	
+	while (commandport.Read() & 0x1) {
+	
+		dataport.Read(); 
+
+		commandport.Write(0xAE); // activate interrupts
+		commandport.Write(0x20); // get current state
+		
+		uint8_t status = (dataport.Read() | 1) & ~0x10;
+		
+		commandport.Write(0x60); // set state
+		dataport.Write(status);
+
+		dataport.Write(0xF4);
+	} // totally copied)
+}
+
+uint32_t LainKeyboardDriver::HandleInterrupt(uint32_t esp) {
+	uint8_t key = dataport.Read();
+	this->handler->keyValue = key;
+
+	if (handler == 0) {
+
+		return esp;
+	}
+
+	if(key & 0x80){
+		if(key > 0xD8) return esp;
+		handler->OnKeyUp(key & 0x7F);
+	}else{
+		if(key > 0x58) return esp;
+		handler->OnKeyDown(key);
+	}
+	// Smaller useful code
+	return esp;
+}
 
 
 KeyboardDriver::KeyboardDriver(InterruptManager* manager, KeyboardEventHandler *handler)

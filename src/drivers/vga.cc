@@ -136,19 +136,58 @@ bool VideoGraphicsArray::SetMode(uint32_t width, uint32_t height, uint32_t color
 
 	//Generate pallete
 	
-	uint16_t color = 0;
-	for(color; color < 256; color++){
-		outb(0x03C8, color);
-		outb(0x03C9, (color & 0x20 ? 0x15 : 0) | (color & 0x04 ? 0x2A: 0));
-		outb(0x03C9, (color & 0x10 ? 0x15 : 0) | (color & 0x02 ? 0x2A: 0));
-		outb(0x03C9, (color & 0x08 ? 0x15 : 0) | (color & 0x01 ? 0x2A: 0));
-	}
-
+	SetPalette(VGA_CS_EGA);
 
 	return true;
 }
 
+void VideoGraphicsArray::SetPalette(uint8_t scheme){
+	uint16_t color = 0;
+	switch (scheme)
+	{
+		case VGA_CS_EGA:
+		for(color; color < 256; color++){
+			outb(0x03C8, color);
+			outb(0x03C9, (color & 0x20 ? 0x15 : 0) | (color & 0x04 ? 0x2A: 0));
+			outb(0x03C9, (color & 0x10 ? 0x15 : 0) | (color & 0x02 ? 0x2A: 0));
+			outb(0x03C9, (color & 0x08 ? 0x15 : 0) | (color & 0x01 ? 0x2A: 0));
+		}
+		break;
 
+		case VGA_CS_RGB222:
+		for(color; color < 256; color++){
+			outb(0x03C8, color);
+			outb(0x03C9, (color & 0x01 ? 0x15 : 0) | (color & 0x02 ? 0x2A: 0));
+			outb(0x03C9, (color & 0x04 ? 0x15 : 0) | (color & 0x08 ? 0x2A: 0));
+			outb(0x03C9, (color & 0x10 ? 0x15 : 0) | (color & 0x20 ? 0x2A: 0));
+		}
+		break;
+
+		case VGA_CS_RGB332:
+		for(color; color < 256; color++){
+			outb(0x03C8, color);
+			outb(0x03C9, (color & 0x01 ? 0x09 : 0) | (color & 0x02 ? 0x12: 0) | (color & 0x04 ? 0x24: 0));
+			outb(0x03C9, (color & 0x08 ? 0x09 : 0) | (color & 0x10 ? 0x12: 0) | (color & 0x20 ? 0x24: 0));
+			outb(0x03C9, (color & 0x40 ? 0x15 : 0) | (color & 0x80 ? 0x2A: 0));
+		}
+		break;
+
+		case VGA_CS_GRAYSCALE:
+		for(color; color < 256; color++){
+			outb(0x03C8, color);
+			outb(0x03C9, color >> 2);
+			outb(0x03C9, color >> 2);
+			outb(0x03C9, color >> 2);
+		}
+		break;
+
+
+	
+	default:
+		break;
+	}
+	
+}
 
 uint8_t* VideoGraphicsArray::GetFrameBufferSegment() {
 

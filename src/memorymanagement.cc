@@ -167,3 +167,22 @@ void operator delete[](void* ptr) {
 
 
 
+void operator delete(void* ptr,unsigned size) {
+
+	if (os::MemoryManager::activeMemoryManager != 0) {
+	
+		os::MemoryManager::activeMemoryManager->free(ptr);
+	}
+}
+
+
+
+void operator delete[](void* ptr,unsigned size) {
+	
+	if (os::MemoryManager::activeMemoryManager != 0) {
+	
+		os::MemoryManager::activeMemoryManager->free(ptr);
+	}
+}
+
+

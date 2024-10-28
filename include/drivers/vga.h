@@ -9,7 +9,10 @@
 #include <gui/pixelart.h>
 #include <math.h>
 
-
+#define VGA_CS_EGA 0
+#define VGA_CS_RGB332 1
+#define VGA_CS_RGB222 2
+#define VGA_CS_GRAYSCALE 3
 
 namespace os {
 
@@ -49,7 +52,8 @@ namespace os {
 
 				virtual bool SupportsMode(common::uint32_t width, common::uint32_t height, common::uint32_t colordepth);
 				virtual bool SetMode(common::uint32_t width, common::uint32_t height, common::uint32_t colordepth);
-				
+				// Select Color Scheme
+				virtual void SetPalette(common::uint8_t scheme);			
 
 				virtual void PutPixel(common::int32_t x, common::int32_t y, common::uint8_t colorIndex);
 				virtual void PutPixelRaw(common::int32_t x, common::int32_t y, common::uint8_t colorIndex);
@@ -95,6 +99,7 @@ namespace os {
 				void FSdither(common::uint32_t* buf, common::uint16_t w, common::uint16_t h);
 				
 				void ErrorScreen();
+
 
 				virtual void MakeDark(common::uint8_t darkness);
 				virtual void MakeWave(common::uint8_t waveLength);

@@ -44,5 +44,9 @@ void operator delete(void* ptr);
 void operator delete[](void* ptr);
 
 
+void operator delete(void* ptr, unsigned size);
+void operator delete[](void* ptr, unsigned size);
+
+
 
 #endif

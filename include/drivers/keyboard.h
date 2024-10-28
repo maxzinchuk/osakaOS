@@ -56,6 +56,24 @@ namespace os {
 				virtual void Activate();	
 		};
 
+		class LainKeyboardDriver : public os::hardwarecommunication::InterruptHandler, public Driver {
+
+				
+			//private:
+			public:
+				os::hardwarecommunication::Port8Bit dataport;
+				os::hardwarecommunication::Port8Bit commandport;
+
+				KeyboardEventHandler* handler;
+			public:
+				LainKeyboardDriver(os::hardwarecommunication::InterruptManager* manager, KeyboardEventHandler* handler);
+				~LainKeyboardDriver();
+		
+				virtual os::common::uint32_t HandleInterrupt(os::common::uint32_t esp);
+				virtual void Activate();	
+		};
+
+
 	}
 }
 

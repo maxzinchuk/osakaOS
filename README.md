@@ -1,13 +1,18 @@
 # osakaOS v2.0
 ![](cube.gif)
 
-<h2>The Osaka Operating System v2.0.</h2>
+<h2>The Osaka Operating System v2.0.(Fork)</h2>
 
 osakaOS is a 32 bit, (optionally) multitasking, megalithic operating system that is made with a focus on unconventional/ridiculous design choices. It is meant to emulate the experience of a videogame or demo software rather than a traditional desktop operating system. It uses different text modes and graphical programs to edit files using the <b>Osaka FileSystem</b> and create programs using the <b>AyumuScript</b> scripting language.
 
 Multitasking kernel programs, file allocation, graphical window manipulation, a paint GUI program, and much more :)
 
 ![](desktop.png)
+
+<h2>Fork Differencies</h2>
+
+Fixed some bugs. Now, I trying to make new desktop environment, Lain Desktop. It planned to look the same, but be more functional and scalable.
+Also I'm looking to rewrite mouse driver due its problems on real hardware. 
 
 <h2>How to run/compile</h2>
 

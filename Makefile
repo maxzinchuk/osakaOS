@@ -2,7 +2,7 @@
 #sudo apt-get install qemu-system-x86_64(any qemu stuff ngl) grub-legacy grub-mkrescue grub2 xorriso
 
 
-GPPPARAMS = -m32 -Iinclude -fno-use-cxa-atexit -nostdlib -fno-builtin -fno-rtti -fno-exceptions -fno-threadsafe-statics -fno-leading-underscore -Wno-write-strings -fno-stack-protector
+GPPPARAMS = -m32 -Iinclude -fpermissive -fno-use-cxa-atexit -nostdlib -fno-builtin -fno-rtti -fno-exceptions -fno-threadsafe-statics -fno-leading-underscore -Wno-write-strings -fno-stack-protector
 ASPARAMS = --32
 LDPARAMS = -melf_i386
 
@@ -24,6 +24,7 @@ objects = obj/loader.o \
 	  obj/drivers/pit.o \
 	  obj/drivers/cmos.o \
 	  obj/drivers/speaker.o \
+	  obj/gui/lain.o \
 	  obj/gui/widget.o \
 	  obj/gui/desktop.o \
 	  obj/gui/window.o \

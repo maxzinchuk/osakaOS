@@ -21,6 +21,7 @@
 #include <gui/raycasting.h>
 #include <gui/font.h>
 #include <gui/pixelart.h>
+#include <gui/lain.h>
 #include <multitasking.h>
 #include <net/network.h>
 #include <net/etherframe.h>
@@ -51,8 +52,12 @@ using namespace os::filesystem;
 using namespace os::gui;
 using namespace os::math;
 
-PeripheralComponentInterconnectController* pcic;
-
+static PeripheralComponentInterconnectController* pcic;
+static VideoGraphicsArray* vga;
+static LainDesktop* ld;
+static MemoryManager* mm;
+static InterruptManager* im;
+static DriverManager* dm;
 
 
 void putcharTUI(unsigned char ch, unsigned char forecolor, 
@@ -921,11 +926,32 @@ void DrawDesktopTask() {
 	while (1) { desktop->Draw(desktop->gc); }
 }
 
+void LainDesktopTask() {
+	ld->Init();
+	while (1) { ld->Tick(); }
+}
+
+
 // Zinchuk. Need for some wierd driver stuff
 PeripheralComponentInterconnectController* GetPeripheralComponentInterconnectController(){
 	return pcic;
 }
 
+VideoGraphicsArray* GetVideoGraphicsArray(){
+	return vga;
+}
+
+MemoryManager* GetMemoryManager(){
+	return mm;
+}
+
+InterruptManager* GetInterruptManager(){
+	return im;
+}
+
+DriverManager* GetDriverManager(){
+	return dm;
+}
 
 typedef void (*constructor)();
 extern "C" constructor start_ctors;
@@ -954,13 +980,14 @@ extern "C" void kernelMain(void* multiboot_structure, uint32_t magicnumber) {
 	uint32_t* memupper = (uint32_t*)(((size_t)multiboot_structure) + 8);
 	size_t heap = 4*1024*1024;
 	MemoryManager memoryManager(heap, (*memupper)*1024 - heap - 10*1024);
-
+	mm = &memoryManager;
 	
 	InterruptManager interrupts(0x20, gdt, &taskManager);
+	im = &interrupts;
 	printf("Initializing Hardware, Stage 1\n");
 
 	DriverManager drvManager;
-	
+	dm = &drvManager;
 	//drivers and command line
 	CMOS cmos;
 	AdvancedTechnologyAttachment ata0m(0x1F0, true);
@@ -977,10 +1004,10 @@ extern "C" void kernelMain(void* multiboot_structure, uint32_t magicnumber) {
 
 
 	//gui driver stuff
-	VideoGraphicsArray vga;
+	vga = new VideoGraphicsArray();
 	Simulator osaka(&cmos);
 	Button buttons;
-	Desktop desktop(320, 200, 0x01, &vga, gdt, &taskManager, 
+	Desktop desktop(320, 200, 0x01, vga, gdt, &taskManager, 
 			&memoryManager, &osakaFileSystem, &cmos, 
 			&drvManager, &buttons, &osaka);
 	MouseDriver mouse(&interrupts, &desktop);
@@ -1082,18 +1109,24 @@ extern "C" void kernelMain(void* multiboot_structure, uint32_t magicnumber) {
 	kbhandler->cli = true;
 	kbhandler->gui = true;
 
-
+	ld = new LainDesktop();
 	//initialize desktop
-	KeyboardDriver keyboardDesktop(&interrupts, &desktop);
-	drvManager.Replace(&keyboardDesktop, 0);
+	//KeyboardDriver keyboardDesktop(&interrupts, &desktop);
+	
+	//drvManager.Replace(&keyboardDesktop, 0);
 
-	desktop.CreateChild(1, "Osaka's Terminal", kbhandler);
+	//desktop.CreateChild(1, "Osaka's Terminal", kbhandler);
 	
-	
+
+	Task guiTask(gdt, LainDesktopTask, "LainDT");
+	taskManager.AddTask(&guiTask);
+
 	//add task for drawing desktop
+	/*
 	LoadDesktopForTask(true, &desktop);
 	Task guiTask(gdt, DrawDesktopTask, "osakaOS GUI");
 	taskManager.AddTask(&guiTask);
+	*/
 
 	
 	//this is the gui :)
